@@ -1,0 +1,159 @@
+#Metody Numerczyne - projekt 4
+
+#Zadanie 1
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+beta = 1.0
+sigma = 1.0
+gamma = 0.1
+
+s0 = 0.99
+e0 = 0.01
+i0 = 0.0
+r0 = 0.0
+y0 = [s0, e0, i0, r0]
+
+t0 = 0.0
+T = 60.0
+h = 0.1
+n = int(T / h)
+
+def seir_model(t, y, beta, sigma, gamma):
+    S, E, I, R = y
+    dS = -beta * S * I
+    dE = beta * S * I - sigma * E
+    dI = sigma * E - gamma * I
+    dR = gamma * I
+    return [dS, dE, dI, dR]
+
+def rk4(f, t0, y0, h, n, *współczynniki):
+    t = [t0]
+    y = [y0]
+    for i in range(n):
+        k1 = h * np.array(f(t[i], y[i], *współczynniki))
+        k2 = h * np.array(f(t[i] + h/2, y[i] + k1/2, *współczynniki))
+        k3 = h * np.array(f(t[i] + h/2, y[i] + k2/2, *współczynniki))
+        k4 = h * np.array(f(t[i] + h, y[i] + k3, *współczynniki))
+        y_next = y[i] + (k1 + 2*k2 + 2*k3 + k4) / 6
+        y.append(y_next)
+        t.append(t[i] + h)
+    return t, np.array(y)
+
+t, y = rk4(seir_model, t0, y0, h, n, beta, sigma, gamma)
+
+plt.title("Model SEIR")
+plt.plot(t, y[:, 0], label='Podatni na zachorowanie')
+plt.plot(t, y[:, 1], label='Wystawieni na działanie wirusa')
+plt.plot(t, y[:, 2], label='Zarażeni')
+plt.plot(t, y[:, 3], label='Osoby z nabytą odpornoscią')
+plt.xlabel('Czas')
+plt.ylabel('Populacja')
+plt.grid()
+plt.legend()
+plt.show()
+
+#Zadanie 2 
+
+beta = 0.5
+
+def seir_model(t, y, beta, sigma, gamma):
+    S, E, I, R = y
+    dS = -beta * S * I
+    dE = beta * S * I - sigma * E
+    dI = sigma * E - gamma * I
+    dR = gamma * I
+    return [dS, dE, dI, dR]
+
+def rk4(f, t0, y0, h, n, *współczynniki):
+    t = [t0]
+    y = [y0]
+    for i in range(n):
+        k1 = h * np.array(f(t[i], y[i], *współczynniki))
+        k2 = h * np.array(f(t[i] + h/2, y[i] + k1/2, *współczynniki))
+        k3 = h * np.array(f(t[i] + h/2, y[i] + k2/2, *współczynniki))
+        k4 = h * np.array(f(t[i] + h, y[i] + k3, *współczynniki))
+        y_next = y[i] + (k1 + 2*k2 + 2*k3 + k4) / 6
+        y.append(y_next)
+        t.append(t[i] + h)
+    return t, np.array(y)
+
+t, y = rk4(seir_model, t0, y0, h, n, beta, sigma, gamma)
+
+plt.title("Model SEIR z beta = 0.5")
+plt.plot(t, y[:, 0], label='Podatni na zachorowanie')
+plt.plot(t, y[:, 1], label='Wystawieni na działanie wirusa')
+plt.plot(t, y[:, 2], label='Zarażeni')
+plt.plot(t, y[:, 3], label='Osoby z nabytą odpornoscią')
+plt.xlabel('Czas')
+plt.ylabel('Populacja')
+plt.grid()
+plt.legend()
+plt.show()
+
+print("Parametr Beta to współczynnik kontaktów/zakażeń, jego obniżona wartość powoduje, że rozprzeszczenianie się wirusa jest bardziej rozłożone w czasie. Krzywa E(t) osiąga dla współczynnika beta = 1 osiąga swoje maksimum ok. 9 dnia, a dla beta = 0.5 wartość maksymalna funkcji zostaje osiągnięta ok. 15 dnia. Wartość maksymalna funkcji e(t) zmniejsza się wraz ze zmniejszaniem się współczynnika beta. Zmniejszając współczynnik beta, funkcja i(t) osiąga niższą wartość w okresie objętym analizą.")
+
+#Zadanie 3
+
+#RO mniejsze od 1
+
+beta_małe = 0.5
+
+def seir_model(t, y, beta, sigma, gamma):
+    S, E, I, R = y
+    dS = -beta * S * I
+    dE = beta * S * I - sigma * E
+    dI = sigma * E - gamma * I
+    dR = gamma * I
+    return [dS, dE, dI, dR]
+
+def rk4(f, t0, y0, h, n, *współczynniki):
+    t = [t0]
+    y = [y0]
+    for i in range(n):
+        k1 = h * np.array(f(t[i], y[i], *współczynniki))
+        k2 = h * np.array(f(t[i] + h/2, y[i] + k1/2, *współczynniki))
+        k3 = h * np.array(f(t[i] + h/2, y[i] + k2/2, *współczynniki))
+        k4 = h * np.array(f(t[i] + h, y[i] + k3, *współczynniki))
+        y_next = y[i] + (k1 + 2*k2 + 2*k3 + k4) / 6
+        y.append(y_next)
+        t.append(t[i] + h)
+    return t, np.array(y)
+
+def R_0(beta, gamma, s0):
+    return beta / gamma * s0
+
+plt.figure(figsize=(12, 8))
+
+t, y_n = rk4(seir_model, 0, y0, 0.1, 100, beta_małe, 1, gamma)
+R0_n = R_0(beta_małe, gamma, s0)
+
+plt.plot(t, y_n[:, 0], label='Podatni na zachorowanie')
+plt.plot(t, y_n[:, 1], label='Wystawieni na działanie wirusa')
+plt.plot(t, y_n[:, 2], label='Zarażeni')
+plt.plot(t, y_n[:, 3], label='Osoby z nabytą odpornoscią')
+plt.title('Model SEIR z R0 mniejszym od 1')
+plt.xlabel('Czas')
+plt.ylabel('Populacja')
+plt.legend()
+plt.grid()
+plt.show()
+
+#R0 większe od 1
+
+beta_duże = 2
+
+t, y_w = rk4(seir_model, 0, y0, 0.1, 100, beta_duże, 1, gamma)
+R0_w = R_0(beta_duże, gamma, s0)
+
+plt.plot(t, y_w[:, 0], label='Podatni na zachorowanie')
+plt.plot(t, y_w[:, 1], label='Wystawieni na działanie wirusa')
+plt.plot(t, y_w[:, 2], label='Zarażeni')
+plt.plot(t, y_w[:, 3], label='Osoby z nabytą odpornoscią')
+plt.title('Model SEIR z R0 większym od 1')
+plt.xlabel('Czas')
+plt.ylabel('Populacja')
+plt.legend()
+plt.grid()
+plt.show()
